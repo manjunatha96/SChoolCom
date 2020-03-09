@@ -4,8 +4,10 @@ const {register} =require('../Model/register')
 const bcrypt=require('bcryptjs')
 const Joi=require('joi')
 const auth=require('../Middleware/logins')
+const jwt=require('jsonwebtoken')
+
 router.get('/logins',[auth], async(req,res)=>{
-    const result=await register.find()
+    const result=await register.find({ is_active : {$eq: true}})
     await res.send(result)
 })
 
@@ -22,7 +24,7 @@ router.post('/posting', async(req,res)=>{
     if(!pass) res.status(401).send('Invalid password..')
     const token= valid.genrate()
    
-    res.send({token})
+    await res.send({token})
 })
 
 router.put('/userUpadte/:id',[auth],async(req,res)=>{
@@ -30,11 +32,15 @@ router.put('/userUpadte/:id',[auth],async(req,res)=>{
     const result=await register.findByIdAndUpdate({_id:req.params.id},
     {is_admin:req.body.is_admin},{new:true})
     
-    res.send(result)
+    await res.send(result)
 })
 
-router.delete('/deleteUser/:id',[auth],async(req,res)=>{
-    const result= await register.fin
+router.put('/deleteUser/:id',[auth],async(req,res)=>{
+    console.log(req.params.id);
+    const result=await register.findByIdAndUpdate({_id:req.params.id},
+    {is_active:req.body.is_active},{new:true})
+    
+    await res.send(result)
 })
 
 const validate=function(users){
